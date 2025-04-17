@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { Settings2, CreditCard, CheckCircle, AlertCircle } from 'lucide-react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Install from './components/Install';
+import Credentials from './components/Credentials';
 
 interface ProcessorConfig {
   mid: string;
@@ -112,55 +115,12 @@ function App() {
   );
 
   return (
-    <div className="min-h-screen bg-charcoal text-text-primary">
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-2xl mx-auto">
-          {/* Logo Container */}
-          <div className="bg-bg-card rounded-lg shadow-lg p-8 mb-8 flex items-center justify-center">
-            <div className="w-48 h-16 bg-charcoal rounded flex items-center justify-center border-2 border-dashed border-olive/20">
-              <Settings2 className="w-8 h-8 text-olive" />
-              <span className="ml-2 text-text-primary font-semibold">Zen Gate Logo</span>
-            </div>
-          </div>
-
-          <div className="bg-bg-card rounded-lg shadow-lg p-8 mb-8">
-            <h1 className="text-2xl font-bold text-text-primary mb-2">
-              Payment Gateway Integration
-            </h1>
-            <p className="text-text-secondary mb-6">
-              Connect your Go High Level marketplace app with payment processors
-            </p>
-            
-            <div className="bg-charcoal border-l-4 border-olive p-4 mb-6">
-              <div className="flex items-start">
-                <AlertCircle className="w-5 h-5 text-olive mr-2 mt-0.5" />
-                <p className="text-sm text-text-secondary">
-                  Your API tokens and Merchant IDs are securely encrypted and stored. Make sure you have the correct credentials before connecting.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <ProcessorCard
-            title="Accept Blue Integration"
-            processor="acceptBlue"
-            config={acceptBlue}
-            onChange={(field, value) => 
-              setAcceptBlue(prev => ({ ...prev, [field]: value }))
-            }
-          />
-
-          <ProcessorCard
-            title="TRX Integration"
-            processor="trx"
-            config={trx}
-            onChange={(field, value) => 
-              setTrx(prev => ({ ...prev, [field]: value }))
-            }
-          />
-        </div>
-      </div>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Install />} />
+        <Route path="/credentials" element={<Credentials />} />
+      </Routes>
+    </Router>
   );
 }
 
