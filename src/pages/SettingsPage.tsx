@@ -16,7 +16,7 @@ export default function SettingsPage() {
 
   useEffect(() => {
     // Check if the GHL location ID exists in localStorage
-    const locationId = localStorage.getItem('ghl_location_id');
+    const locationId = localStorage.getItem('location_id');
     
     if (!locationId) {
       // Redirect user to the OAuth or login page if not installed
