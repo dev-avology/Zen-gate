@@ -8,8 +8,9 @@ const OAuthRedirect: React.FC = () => {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const locationId = params.get('location_id');
+    console.log(locationId,'locationIdlocationIdlocationId');
     if (locationId) {
-      localStorage.setItem('ghl_location_id', locationId);
+      localStorage.setItem('location_id', locationId);
       navigate('/settings');
     }
   }, [location]);

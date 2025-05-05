@@ -7,7 +7,7 @@ const api: AxiosInstance = axios.create({
 
 // Add token if available for API requests
 api.interceptors.request.use((config) => {
-  const locationId = localStorage.getItem('ghl_location_id');
+  const locationId = localStorage.getItem('location_id');
   if (locationId) {
     config.headers['X-Location-Id'] = locationId;
   }

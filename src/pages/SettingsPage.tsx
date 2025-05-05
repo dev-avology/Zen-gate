@@ -9,34 +9,33 @@ export default function SettingsPage() {
   const [form, setForm] = useState({
     apiKey: '',
     apiSecret: '',
-    surcharge: ''
+    surcharge: '',
   });
   const [error, setError] = useState('');
   const [isInstalled, setIsInstalled] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    // Check if the GHL location ID exists in localStorage
     const locationId = localStorage.getItem('location_id');
-    
-    if (!locationId) {
-      // Redirect user to the OAuth or login page if not installed
-      navigate('/oauth');
-      return;
-    }
+    if (!locationId) return;
 
-    // Fetch configuration if installed
-    api.get('/api/config')
-      .then(res => {
+    api
+      .get('/api/config', {
+        headers: {
+          'X-Location-Id': locationId,
+        },
+      })
+      .then((res) => {
         if (res.data) {
           setForm(res.data);
-          setIsInstalled(true);  // Mark as installed if configuration exists
+          setIsInstalled(true);
         }
       })
-      .catch(err => {
+      .catch((err) => {
         console.error('❌ Error fetching config', err);
         setIsInstalled(false);
       });
-  }, [navigate]);
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -44,29 +43,57 @@ export default function SettingsPage() {
 
   const handleSubmit = async () => {
     setError('');
+    setIsLoading(true);
+    const locationId = localStorage.getItem('location_id');
+
     try {
-      await api.post('/api/config', form);
+      await api.post('/api/config-save', form, {
+        headers: {
+          'X-Location-Id': locationId,
+        },
+      });
       alert('✅ Settings saved successfully!');
     } catch (err: any) {
       console.error('❌ Error saving settings', err);
-      setError(err?.response?.data?.message || err.message || 'Something went wrong');
+
+      if (err?.response?.status === 422 && err?.response?.data?.errors) {
+        const messages = Object.values(err.response.data.errors).flat().join(' ');
+        setError(messages);
+      } else {
+        setError(
+          err?.response?.data?.message || err.message || 'Something went wrong'
+        );
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
   if (!isInstalled) {
     return (
-      <div>
-        <p>You need to complete the installation process before accessing the settings.</p>
-        <button onClick={() => navigate('/oauth')}>Go to OAuth</button>
+      <div className="text-center py-10">
+        <p className="text-lg font-medium mb-4">
+          You need to complete the installation process before accessing the settings.
+        </p>
+        <button
+          onClick={() => navigate('/oauth')}
+          className="px-6 py-2 bg-olive text-white rounded-md hover:bg-olive-dark transition"
+        >
+          Go to OAuth
+        </button>
       </div>
     );
   }
 
   return (
     <div>
-      <h2>Payment Settings</h2>
-      <SettingsForm form={form} onChange={handleChange} onSubmit={handleSubmit} />
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      <SettingsForm
+        form={form}
+        onChange={handleChange}
+        onSubmit={handleSubmit}
+        isLoading={isLoading}
+        error={error}
+      />
     </div>
   );
 }
