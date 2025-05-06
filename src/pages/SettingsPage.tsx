@@ -12,19 +12,21 @@ async function getUserData() {
       const messageHandler = ({ data }: MessageEvent) => {
         if (data.message === "REQUEST_USER_DATA_RESPONSE") {
           window.removeEventListener("message", messageHandler);
-          resolve(data.payload);
+          resolve(data.payload); // <-- This is encrypted data
         }
       };
 
       window.addEventListener("message", messageHandler);
     });
 
-    return encryptedUserData; // <-- only returns encrypted data
+    console.log("Encrypted Data:", encryptedUserData);  // Log encrypted data
+    return encryptedUserData;  // Return the encrypted data
   } catch (error) {
     console.error("Failed to fetch user data:", error);
     throw error;
   }
 }
+
 
 
 export default function SettingsPage() {
@@ -63,35 +65,23 @@ export default function SettingsPage() {
         fetchConfig(storedLocationId);
         return;
       }
-
+  
       if (window.self !== window.top) {
         console.log("🖼 Inside iframe, requesting encrypted context...");
-        // try {
+        try {
           const encryptedData = await getUserData();
-          console.log(encryptedData); // 👈 This will only console the encrypted data
-          
-          // const locationId = userData?.locationId;
-          // console.log("🖼 Inside iframe, requesting encrypted context..." + userData);
-          console.log(encryptedData,'encryptedData');
-
-          // if (locationId) {
-          //   localStorage.setItem("location_id", locationId);
-          //   console.log("📦 locationId stored in localStorage:", locationId);
-          //   fetchConfig(locationId);
-          //   setIsInstalled(true);
-          // } else {
-          //   console.warn("⚠️ No locationId in decrypted user data");
-          // }
-        // } catch (err) {
-        //   console.error("❌ Failed to fetch and decrypt context", err);
-        // }
+          console.log("Encrypted Data:", encryptedData); // 👈 This will show encrypted data
+        } catch (err) {
+          console.error("❌ Failed to fetch encrypted user data", err);
+        }
       } else {
         console.log("🌐 Not inside iframe. Manual auth might be needed.");
       }
     };
-
+  
     init();
   }, []);
+  
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
