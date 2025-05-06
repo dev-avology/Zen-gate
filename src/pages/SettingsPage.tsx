@@ -19,21 +19,13 @@ async function getUserData() {
       window.addEventListener("message", messageHandler);
     });
 
-    // const response = await fetch("your-backend-endpoint", {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //   },
-    //   body: JSON.stringify({ encryptedData: encryptedUserData }),
-    // });
-
-    // const userData = await response.json();
-    return encryptedUserData;
+    return encryptedUserData; // <-- only returns encrypted data
   } catch (error) {
     console.error("Failed to fetch user data:", error);
     throw error;
   }
 }
+
 
 export default function SettingsPage() {
   const navigate = useNavigate();
@@ -74,11 +66,13 @@ export default function SettingsPage() {
 
       if (window.self !== window.top) {
         console.log("🖼 Inside iframe, requesting encrypted context...");
-        try {
-          const userData = await getUserData();
+        // try {
+          const encryptedData = await getUserData();
+          console.log(encryptedData); // 👈 This will only console the encrypted data
+          
           // const locationId = userData?.locationId;
           // console.log("🖼 Inside iframe, requesting encrypted context..." + userData);
-          console.log(userData,'userData');
+          console.log(encryptedData,'encryptedData');
 
           // if (locationId) {
           //   localStorage.setItem("location_id", locationId);
@@ -88,9 +82,9 @@ export default function SettingsPage() {
           // } else {
           //   console.warn("⚠️ No locationId in decrypted user data");
           // }
-        } catch (err) {
-          console.error("❌ Failed to fetch and decrypt context", err);
-        }
+        // } catch (err) {
+        //   console.error("❌ Failed to fetch and decrypt context", err);
+        // }
       } else {
         console.log("🌐 Not inside iframe. Manual auth might be needed.");
       }
