@@ -3,6 +3,38 @@ import { useNavigate } from "react-router-dom";
 import api from "../api/api";
 import SettingsForm from "../components/SettingsForm";
 
+// 👇 Function to get user data from parent context
+async function getUserData() {
+  try {
+    const encryptedUserData = await new Promise((resolve) => {
+      window.parent.postMessage({ message: "REQUEST_USER_DATA" }, "*");
+
+      const messageHandler = ({ data }: MessageEvent) => {
+        if (data.message === "REQUEST_USER_DATA_RESPONSE") {
+          window.removeEventListener("message", messageHandler);
+          resolve(data.payload);
+        }
+      };
+
+      window.addEventListener("message", messageHandler);
+    });
+
+    // const response = await fetch("your-backend-endpoint", {
+    //   method: "POST",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //   },
+    //   body: JSON.stringify({ encryptedData: encryptedUserData }),
+    // });
+
+    // const userData = await response.json();
+    return encryptedUserData;
+  } catch (error) {
+    console.error("Failed to fetch user data:", error);
+    throw error;
+  }
+}
+
 export default function SettingsPage() {
   const navigate = useNavigate();
   const [form, setForm] = useState({
@@ -30,64 +62,41 @@ export default function SettingsPage() {
     }
   };
 
-  const handleMessage = (event: MessageEvent) => {
-    console.log("📥 Raw message:", JSON.stringify(event.data, null, 2));
-    if (typeof event.data !== "object") return;
-
-    try {
-      let locationId: string | undefined;
-
-      if (event.data.type === "ghl:context") {
-        locationId = event.data.payload?.locationId;
-      }
-
-      if (!locationId && event.data.location_id) {
-        locationId = event.data.location_id;
-      }
-
-      if (!locationId) {
-        console.warn("⚠️ No locationId found in message");
+  useEffect(() => {
+    const init = async () => {
+      const storedLocationId = localStorage.getItem("location_id");
+      if (storedLocationId) {
+        console.log("🗃 Initial localStorage location_id:", storedLocationId);
+        setIsInstalled(true);
+        fetchConfig(storedLocationId);
         return;
       }
 
-      console.log("✅ Received locationId:", locationId);
+      if (window.self !== window.top) {
+        console.log("🖼 Inside iframe, requesting encrypted context...");
+        try {
+          const userData = await getUserData();
+          // const locationId = userData?.locationId;
+          // console.log("🖼 Inside iframe, requesting encrypted context..." + userData);
+          console.log(userData,'userData');
 
-      const storedLocationId = localStorage.getItem("location_id");
-      if (storedLocationId !== locationId) {
-        localStorage.setItem("location_id", locationId);
-        console.log("📦 locationId stored in localStorage:", locationId);
-        fetchConfig(locationId);
+          // if (locationId) {
+          //   localStorage.setItem("location_id", locationId);
+          //   console.log("📦 locationId stored in localStorage:", locationId);
+          //   fetchConfig(locationId);
+          //   setIsInstalled(true);
+          // } else {
+          //   console.warn("⚠️ No locationId in decrypted user data");
+          // }
+        } catch (err) {
+          console.error("❌ Failed to fetch and decrypt context", err);
+        }
       } else {
-        console.log("🟢 locationId unchanged. Skipping fetch.");
+        console.log("🌐 Not inside iframe. Manual auth might be needed.");
       }
-
-      setIsInstalled(true);
-    } catch (err) {
-      console.error("❌ Error processing message:", err);
-    }
-  };
-
-  useEffect(() => {
-    const storedLocationId = localStorage.getItem("location_id");
-    console.log("🗃 Initial localStorage location_id:", storedLocationId);
-    if (storedLocationId) {
-      setIsInstalled(true);
-      fetchConfig(storedLocationId);
-    }
-
-    window.addEventListener("message", handleMessage);
-
-    if (window.self !== window.top) {
-      // We're inside an iframe
-      console.log("🖼 Inside iframe, requesting context");
-      window.parent.postMessage({ type: "ghl:get-context" }, "*");
-    } else {
-      console.log("🌐 Not inside iframe. Manual auth might be needed.");
-    }
-
-    return () => {
-      window.removeEventListener("message", handleMessage);
     };
+
+    init();
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
