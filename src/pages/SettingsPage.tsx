@@ -77,21 +77,13 @@ export default function SettingsPage() {
 
     window.addEventListener("message", handleMessage);
 
-    // Request context from parent frame (GHL)
-    window.parent.postMessage({ type: "ghl:get-context" }, "*");
-
-    return () => {
-      window.removeEventListener("message", handleMessage);
-    };
-    if (storedLocationId) {
-      setIsInstalled(true);
-      fetchConfig(storedLocationId);
+    if (window.self !== window.top) {
+      // We're inside an iframe
+      console.log("🖼 Inside iframe, requesting context");
+      window.parent.postMessage({ type: "ghl:get-context" }, "*");
+    } else {
+      console.log("🌐 Not inside iframe. Manual auth might be needed.");
     }
-
-    window.addEventListener("message", handleMessage);
-
-    // Request context from parent frame (GHL)
-    window.parent.postMessage({ type: "ghl:get-context" }, "*");
 
     return () => {
       window.removeEventListener("message", handleMessage);
