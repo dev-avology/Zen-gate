@@ -20,6 +20,20 @@ async function getUserData() {
     });
 
     console.log("Encrypted Data:", encryptedUserData);  // Log encrypted data
+
+    // try {
+      const res = await api.post("/api/decrypt-data", {
+        encrypted_data: encryptedUserData,
+      });
+
+      if (res.data) {
+        console.log("✅ Decrypted Data:", res.data);
+        return res.data;
+      }
+    // } catch (err) {
+    //   console.error("❌ Error decrypting user data", err);
+    // }
+
     return encryptedUserData;  // Return the encrypted data
   } catch (error) {
     console.error("Failed to fetch user data:", error);
