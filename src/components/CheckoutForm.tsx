@@ -98,7 +98,7 @@ export default function CheckoutForm() {
   return (
     <div>
       <h2>Checkout</h2>
-      <div id="my-div" />
+      {/* <div id="my-div" /> */}
       <button onClick={handleSubmit}>Pay</button>
       {error && <p style={{ color: 'red' }}>{error}</p>}
 
