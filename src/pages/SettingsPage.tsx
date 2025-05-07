@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/api";
 import SettingsForm from "../components/SettingsForm";
+import { toast, Toaster } from 'react-hot-toast';
 
 // Request encrypted user data from parent frame and decrypt it
 async function getUserData() {
@@ -113,7 +114,7 @@ export default function SettingsPage() {
       await api.post("/api/config-save", form, {
         headers: { "X-Location-Id": locationId },
       });
-      alert("✅ Settings saved successfully!");
+      toast.success("✅ Settings saved successfully!");
     } catch (err: any) {
       console.error("❌ Error saving settings", err);
       if (err?.response?.status === 422 && err?.response?.data?.errors) {
