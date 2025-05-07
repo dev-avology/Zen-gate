@@ -3,45 +3,43 @@ import { useNavigate } from "react-router-dom";
 import api from "../api/api";
 import SettingsForm from "../components/SettingsForm";
 
-// 👇 Function to get user data from parent context
+// Request encrypted user data from parent frame and decrypt it
 async function getUserData() {
   try {
-    const encryptedUserData = await new Promise((resolve) => {
+    const encryptedUserData = await new Promise<string>((resolve) => {
       window.parent.postMessage({ message: "REQUEST_USER_DATA" }, "*");
 
       const messageHandler = ({ data }: MessageEvent) => {
         if (data.message === "REQUEST_USER_DATA_RESPONSE") {
           window.removeEventListener("message", messageHandler);
-          resolve(data.payload); // <-- This is encrypted data
+          resolve(data.payload); // Encrypted string
         }
       };
 
       window.addEventListener("message", messageHandler);
     });
 
-    console.log("Encrypted Data:", encryptedUserData);  // Log encrypted data
+     // Send encrypted data to your backend for decryption
+     const response = await fetch('hhttps://phpstack-1180784-5431682.cloudwaysapps.com/api/decrypt-data', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ encrypted_data: encryptedUserData })
+    })
+    console.log('encryptedUserData',encryptedUserData);
+    const userData = await response.json()
+    console.log(userData);
 
-    // try {
-      const res = await api.post("/api/decrypt-data", {
-        encrypted_data: encryptedUserData,
-      });
+    console.log("🔐 Received Encrypted Data:", userData);
 
-      if (res.data) {
-        console.log("✅ Decrypted Data:", res.data);
-        return res.data;
-      }
-    // } catch (err) {
-    //   console.error("❌ Error decrypting user data", err);
-    // }
 
-    return encryptedUserData;  // Return the encrypted data
+    return userData;
   } catch (error) {
-    console.error("Failed to fetch user data:", error);
+    console.error("❌ Failed to get or decrypt user data:", error);
     throw error;
   }
 }
-
-
 
 export default function SettingsPage() {
   const navigate = useNavigate();
@@ -74,28 +72,34 @@ export default function SettingsPage() {
     const init = async () => {
       const storedLocationId = localStorage.getItem("location_id");
       if (storedLocationId) {
-        console.log("🗃 Initial localStorage location_id:", storedLocationId);
+        console.log("🗃 LocalStorage location_id:", storedLocationId);
         setIsInstalled(true);
         fetchConfig(storedLocationId);
         return;
       }
-  
+
       if (window.self !== window.top) {
-        console.log("🖼 Inside iframe, requesting encrypted context...");
+        console.log("🖼 Inside iframe, requesting context...");
         try {
-          const encryptedData = await getUserData();
-          console.log("Encrypted Data:", encryptedData); // 👈 This will show encrypted data
+          const userData = await getUserData();
+
+          if (userData?.location_id) {
+            localStorage.setItem("location_id", userData.location_id);
+            fetchConfig(userData.location_id);
+            setIsInstalled(true);
+          } else {
+            console.warn("⚠️ No location_id found in decrypted user data");
+          }
         } catch (err) {
-          console.error("❌ Failed to fetch encrypted user data", err);
+          console.error("❌ Failed to process user data", err);
         }
       } else {
         console.log("🌐 Not inside iframe. Manual auth might be needed.");
       }
     };
-  
+
     init();
   }, []);
-  
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
