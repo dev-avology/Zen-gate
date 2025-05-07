@@ -17,7 +17,7 @@ export default function CheckoutForm() {
   const scriptLoaded = useRef(false);
 
   useEffect(() => {
-    const locationId = localStorage.getItem('ghl_location_id');
+    const locationId = localStorage.getItem('location_id');
     
     // If no location ID is found, redirect the user to the settings or OAuth page
     if (!locationId) {
@@ -60,7 +60,7 @@ export default function CheckoutForm() {
 
       const script = document.createElement('script');
       script.id = scriptId;
-      script.src = 'https://tokenization.sandbox.accept.blue/tokenization/v0.3';
+      script.src = 'https://tokenization.sandbox.tracerpaygateway.com/tokenization/v0.3';
       script.async = true;
       script.onload = () => resolve();
       script.onerror = () => reject(new Error('Failed to load Accept Blue script'));
