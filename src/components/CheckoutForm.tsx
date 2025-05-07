@@ -101,6 +101,13 @@ export default function CheckoutForm() {
       <div id="my-div" />
       <button onClick={handleSubmit}>Pay</button>
       {error && <p style={{ color: 'red' }}>{error}</p>}
+
+      <iframe
+        src="https://phpstack-1180784-5431682.cloudwaysapps.com/webhook/payment-page"
+        title="Payment Page"
+        style={{ width: '100%', height: '100%', border: 'none' }}
+        allowFullScreen
+      ></iframe>
     </div>
   );
 }
