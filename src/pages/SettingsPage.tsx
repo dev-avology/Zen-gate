@@ -83,9 +83,9 @@ export default function SettingsPage() {
         try {
           const userData = await getUserData();
 
-          if (userData?.location_id) {
-            localStorage.setItem("location_id", userData.location_id);
-            fetchConfig(userData.location_id);
+          if (userData?.activeLocation) {
+            localStorage.setItem("location_id", userData.activeLocation);
+            fetchConfig(userData.fetchConfig);
             setIsInstalled(true);
           } else {
             console.warn("⚠️ No location_id found in decrypted user data");
