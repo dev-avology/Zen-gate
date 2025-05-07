@@ -20,7 +20,7 @@ async function getUserData() {
     });
 
      // Send encrypted data to your backend for decryption
-     const response = await fetch('https://phpstack-1180784-5431682.cloudwaysapps.com/api/decrypt-data', {
+     const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/decrypt-data`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
