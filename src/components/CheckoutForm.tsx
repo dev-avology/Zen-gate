@@ -33,7 +33,7 @@ export default function CheckoutIframePage() {
           scriptLoaded.current = true;
         }
 
-        const tokenizationSourceKey = 'pk_abc123'; // Replace with your actual public key
+        const tokenizationSourceKey = '0Xe9TlQpkpfQf6ZFxT2ozBqS5Z5Ey7sD'; // Replace with your actual public key
         const options = { target: '#card-form' };
 
         if (!tokenizationRef.current && window.HostedTokenization) {
