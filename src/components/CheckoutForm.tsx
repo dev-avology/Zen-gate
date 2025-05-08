@@ -27,16 +27,21 @@ export default function CheckoutIframePage() {
     setIsGhlReady(true);
 
     const initTokenization = async () => {
-      if (!scriptLoaded.current) {
-        await loadHostedTokenizationScript();
-        scriptLoaded.current = true;
-      }
+      try {
+        if (!scriptLoaded.current) {
+          await loadHostedTokenizationScript();
+          scriptLoaded.current = true;
+        }
 
-      const tokenizationSourceKey = 'pk_abc123'; // replace with your key
-      const options = { target: '#card-form' };
+        const tokenizationSourceKey = 'pk_abc123'; // Replace with your actual public key
+        const options = { target: '#card-form' };
 
-      if (!tokenizationRef.current && window.HostedTokenization) {
-        tokenizationRef.current = new window.HostedTokenization(tokenizationSourceKey, options);
+        if (!tokenizationRef.current && window.HostedTokenization) {
+          tokenizationRef.current = new window.HostedTokenization(tokenizationSourceKey, options);
+        }
+      } catch (err) {
+        toast.error('❌ Failed to load payment script');
+        console.error(err);
       }
     };
 
@@ -72,21 +77,28 @@ export default function CheckoutIframePage() {
     setIsLoading(true);
 
     try {
-      if (!tokenizationRef.current) throw new Error('Tokenization not initialized');
+      if (!tokenizationRef.current) {
+        throw new Error('Tokenization not initialized');
+      }
 
       const result = await tokenizationRef.current.getNonceToken();
       const nonceToken = result.token;
+      console.log('nonceToken',nonceToken);
 
       const response = await api.post('/api/charge', {
         token: nonceToken,
-        amount: 1000,
+        amount: 1000, // e.g., $10.00 in cents
         description: 'Test transaction',
       });
 
       toast.success('✅ Payment Successful');
+      navigate('/success'); // Optional: redirect on success
     } catch (err: any) {
       console.error(err);
-      setError(err?.response?.data?.message || err.message || 'Something went wrong');
+      const message =
+        err?.response?.data?.message || err.message || '❌ Something went wrong';
+      setError(message);
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }
@@ -109,7 +121,9 @@ export default function CheckoutIframePage() {
           onClick={handleSubmit}
           disabled={isLoading}
           className={`w-full py-2 rounded-md font-medium flex items-center justify-center text-white ${
-            isLoading ? 'bg-gray-600' : 'bg-gradient-to-r from-[#8C8C5C] to-[#A2A264] hover:opacity-90'
+            isLoading
+              ? 'bg-gray-600'
+              : 'bg-gradient-to-r from-[#8C8C5C] to-[#A2A264] hover:opacity-90'
           }`}
         >
           {isLoading ? 'Processing...' : (
