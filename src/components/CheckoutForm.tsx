@@ -19,7 +19,6 @@ export default function CheckoutIframePage() {
 
   useEffect(() => {
     const locationId = localStorage.getItem('location_id');
-
     if (!locationId) {
       navigate('/settings');
       return;
@@ -27,13 +26,13 @@ export default function CheckoutIframePage() {
 
     setIsGhlReady(true);
 
-    const loadScriptAndInit = async () => {
+    const initTokenization = async () => {
       if (!scriptLoaded.current) {
         await loadHostedTokenizationScript();
         scriptLoaded.current = true;
       }
 
-      const tokenizationSourceKey = 'pk_abc123'; // Replace with your actual key
+      const tokenizationSourceKey = 'pk_abc123'; // replace with your key
       const options = { target: '#card-form' };
 
       if (!tokenizationRef.current && window.HostedTokenization) {
@@ -41,7 +40,7 @@ export default function CheckoutIframePage() {
       }
     };
 
-    loadScriptAndInit();
+    initTokenization();
 
     return () => {
       const container = document.getElementById('card-form');
@@ -60,7 +59,7 @@ export default function CheckoutIframePage() {
 
       const script = document.createElement('script');
       script.id = scriptId;
-      script.src = 'https://tokenization.sandbox.tracerpaygateway.com/tokenization/v0.3'; // Use live URL if needed
+      script.src = 'https://tokenization.sandbox.tracerpaygateway.com/tokenization/v0.3'; // sandbox URL
       script.async = true;
       script.onload = () => resolve();
       script.onerror = () => reject(new Error('❌ Failed to load Accept Blue script'));
@@ -93,30 +92,38 @@ export default function CheckoutIframePage() {
     }
   };
 
-  if (!isGhlReady) {
-    return (
-      <div className="text-center py-10">
-        <p className="text-gray-600">Loading... Please connect to GHL first.</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="max-w-md mx-auto mt-10 p-6 bg-white shadow-lg rounded-xl">
-      <h2 className="text-2xl font-semibold mb-4 text-center">Secure Checkout</h2>
-      <div id="card-form" className="border p-4 rounded-md mb-4" />
+    <div className="min-h-screen bg-[#121212] flex items-center justify-center p-6">
+      <div className="w-full max-w-md bg-[#1E1E1E] text-white rounded-xl shadow-lg p-6">
+        <h2 className="text-2xl font-semibold mb-1">Payment Gateway Integration</h2>
+        <p className="text-gray-400 mb-6">Connect your payment process to complete the setup</p>
 
-      {error && <p className="text-red-600 text-sm mt-2">{error}</p>}
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-2">Card Details</label>
+          <div id="card-form" className="bg-[#2C2C2C] p-4 rounded-md border border-gray-700" />
+        </div>
 
-      <button
-        onClick={handleSubmit}
-        disabled={isLoading}
-        className={`w-full py-2 px-4 rounded-md text-white transition ${
-          isLoading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
-        }`}
-      >
-        {isLoading ? 'Processing...' : 'Pay Now'}
-      </button>
+        {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+
+        <button
+          onClick={handleSubmit}
+          disabled={isLoading}
+          className={`w-full py-2 rounded-md font-medium flex items-center justify-center text-white ${
+            isLoading ? 'bg-gray-600' : 'bg-gradient-to-r from-[#8C8C5C] to-[#A2A264] hover:opacity-90'
+          }`}
+        >
+          {isLoading ? 'Processing...' : (
+            <>
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" strokeWidth="2"
+                   viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round"
+                      d="M12 4v16m8-8H4" />
+              </svg>
+              Pay Now
+            </>
+          )}
+        </button>
+      </div>
     </div>
   );
 }
