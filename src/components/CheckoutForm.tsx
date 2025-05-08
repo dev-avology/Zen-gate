@@ -38,6 +38,11 @@ export default function CheckoutIframePage() {
 
         if (!tokenizationRef.current && window.HostedTokenization) {
           tokenizationRef.current = new window.HostedTokenization(tokenizationSourceKey, options);
+          window.HostedTokenization.setOptions({
+            styles: {
+              card: 'border: 1px solid black',
+            }
+          });
         }
       } catch (err) {
         toast.error('❌ Failed to load payment script');
