@@ -56,7 +56,7 @@ export default function SettingsPage() {
   const fetchConfig = async (locationId: string) => {
     console.log("📡 Fetching config for location_id:", locationId);
     try {
-      const res = await api.get("/api/config", {
+      const res = await api.get("/config", {
         headers: { "X-Location-Id": locationId },
       });
       if (res.data) {
@@ -111,7 +111,7 @@ export default function SettingsPage() {
     setIsLoading(true);
     const locationId = localStorage.getItem("location_id");
     try {
-      await api.post("/api/config-save", form, {
+      await api.post("/config-save", form, {
         headers: { "X-Location-Id": locationId },
       });
       toast.success("✅ Settings saved successfully!");
