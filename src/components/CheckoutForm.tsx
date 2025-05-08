@@ -87,8 +87,9 @@ export default function CheckoutIframePage() {
 
       const response = await api.post('/api/charge', {
         token: nonceToken,
-        amount: 1000, // e.g., $10.00 in cents
+        amount: 200, // e.g., $10.00 in cents
         description: 'Test transaction',
+        surcharge: 100 // or true depending on your logic
       });
 
       toast.success('✅ Payment Successful');
